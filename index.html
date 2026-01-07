@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEON SHOP</title>
+
+<style>
+:root{
+    --neon:#39ff14;
+    --bg:#0a0a0a;
+    --box:#151515;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+
+body{background:var(--bg);color:#fff}
+
+header{
+    background:var(--box);
+    border-bottom:1px solid var(--neon);
+    padding:14px 18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{color:var(--neon);font-weight:bold;cursor:pointer}
+
+.hamburger{
+    width:26px;height:20px;
+    display:flex;flex-direction:column;
+    justify-content:space-between;cursor:pointer
+}
+.hamburger span{height:3px;background:var(--neon)}
+
+nav{
+    position:fixed;top:0;left:-100%;
+    width:75%;height:100%;
+    background:var(--box);
+    padding:20px;transition:.3s;z-index:100
+}
+nav.active{left:0}
+nav li{
+    list-style:none;
+    padding:14px 0;
+    border-bottom:1px solid #222;
+    color:var(--neon);
+    cursor:pointer
+}
+
+.container{padding:18px}
+
+.products{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px
+}
+
+.product{
+    background:#111;
+    border:1px solid #222;
+    border-radius:12px;
+    overflow:hidden;
+    cursor:pointer
+}
+.product img{width:100%;height:180px;object-fit:cover}
+.product-info{padding:12px}
+.product-info p{color:var(--neon);font-weight:bold}
+
+button{
+    background:var(--neon);
+    color:#000;
+    border:none;
+    padding:10px 14px;
+    border-radius:8px;
+    font-weight:bold;
+    cursor:pointer
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border-radius:6px;
+    border:none
+}
+
+.cart-item{
+    background:#111;
+    border:1px solid #222;
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:12px
+}
+
+.small-print{
+    font-size:11px;
+    color:#aaa;
+    border-left:2px solid #333;
+    padding-left:10px;
+    margin:20px 0;
+    line-height:1.5
+}
+
+@media(min-width:1024px){
+    nav,.hamburger{display:none}
+    .products{grid-template-columns:repeat(4,1fr)}
+    header,.container{padding-left:40px;padding-right:40px}
+}
+</style>
+</head>
+<body>
+
+<nav id="menu">
+<ul>
+<li onclick="goHome()">Strona główna</li>
+<li onclick="filter('buty')">Buty</li>
+<li onclick="filter('ubrania')">Ubrania</li>
+<li onclick="filter('pilka')">Piłka nożna</li>
+<li onclick="showCart()">Koszyk</li>
+<li onclick="showAccount()">Konto</li>
+<li onclick="showPolicy()">Polityka</li>
+</ul>
+</nav>
+
+<header>
+<div class="logo" onclick="goHome()">NEON SHOP</div>
+<div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</header>
+
+<div class="container" id="content"></div>
+
+<script>
+const products=[
+{id:1,name:"Nike Shox TL Fade",price:49.99,cat:"buty",img:"https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto/36377abd-07c8-454f-a23d-0f183c5758c4/W+NIKE+SHOX+TL+FADE.png"},
+{id:2,name:"Nike Air force 1",price:70,cat:"buty",img:"https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto/odhlk8ksqmstmdcjjyn0/W+AF1+SHADOW.png"},
+{id:3,name:"Nike dunk",price:70,cat:"Buty",img:"https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto/8d6b6d0d-c499-417e-a93a-7381652c1cac/W+NIKE+DUNK+LOW+NEXT+NATURE.png"},
+{id:4,name:"Spodnie Jordan",price:29.99,cat:"ubrania",img:"https://debrande.pl/hpeciai/7dcdd9997129231793522544bb74dbfe/pol_pl_NIKE-JORDAN-SPODNIE-RDRESOWE-MESKIE-DQ7890-066-5960_8.jpg"}, 
+{id:5,name:"Koszulka Fc Barcelona 24/25",price:30,cat:"pilka",img:"https://contents.mediadecathlon.com/m20577479/k$850fdea66e89fd3357c87b95320401ea/sq/koszulka-kibica-fc-barcelona-24-25-premium-second-number-replika.jpg?format=auto&f=480x480"}
+];
+
+let cart=JSON.parse(localStorage.getItem("cart"))||[];
+let users=JSON.parse(localStorage.getItem("users"))||[];
+let currentUser=JSON.parse(localStorage.getItem("currentUser"))||null;
+
+function saveAll(){
+localStorage.setItem("cart",JSON.stringify(cart));
+localStorage.setItem("users",JSON.stringify(users));
+localStorage.setItem("currentUser",JSON.stringify(currentUser));
+}
+
+function toggleMenu(){menu.classList.toggle("active")}
+function goHome(){showProducts(products)}
+
+function showProducts(list){
+content.innerHTML=`<div class="products">
+${list.map(p=>`
+<div class="product" onclick="showProduct(${p.id})">
+<img src="${p.img}">
+<div class="product-info">
+<h3>${p.name}</h3>
+<p>${p.price} zł</p>
+</div></div>`).join("")}</div>`;
+}
+
+function showProduct(id){
+let p=products.find(x=>x.id===id);
+content.innerHTML=`
+<img src="${p.img}" style="width:100%;max-width:420px;border-radius:12px">
+<h2>${p.name}</h2>
+<p style="color:var(--neon)">${p.price} zł</p>
+<button onclick="addToCart(${id})">Dodaj do koszyka</button>`;
+}
+
+function addToCart(id){
+let i=cart.find(x=>x.id===id);
+if(i)i.qty++;else cart.push({...products.find(x=>x.id===id),qty:1});
+saveAll();alert("Dodano");
+}
+
+function showCart(){
+if(!cart.length){content.innerHTML="<p>Koszyk pusty</p>";return}
+let sum=0;
+content.innerHTML=cart.map(i=>{
+sum+=i.price*i.qty;
+return`
+<div class="cart-item">
+<b>${i.name}</b><br>${i.price} zł
+<div>
+<button onclick="i.qty--;saveAll();showCart()">-</button>
+${i.qty}
+<button onclick="i.qty++;saveAll();showCart()">+</button>
+<button onclick="cart=cart.filter(x=>x.id!==${i.id});saveAll();showCart()">Usuń</button>
+</div></div>`}).join("")+
+`<h3 style="color:var(--neon)">Suma: ${sum} zł</h3>`;
+}
+
+function filter(c){toggleMenu();showProducts(products.filter(p=>p.cat===c))}
+
+function showAccount(){
+toggleMenu();
+if(!currentUser){
+content.innerHTML=`
+<h2>Logowanie</h2>
+<input id="luser" placeholder="Login">
+<input id="lpass" type="password" placeholder="Hasło">
+<button onclick="login()">Zaloguj</button>
+<hr style="margin:20px 0">
+<h2>Rejestracja</h2>
+<input id="ruser" placeholder="Login">
+<input id="rpass" type="password" placeholder="Hasło">
+<button onclick="register()">Zarejestruj</button>`;
+}else{
+content.innerHTML=`
+<h2>Konto użytkownika</h2>
+<p>Zalogowany jako: <b>${currentUser}</b></p>
+<button onclick="logout()">Wyloguj</button>`;
+}
+}
+
+function register(){
+users.push({u:ruser.value,p:rpass.value});
+saveAll();alert("Zarejestrowano");
+}
+
+function login(){
+let u=users.find(x=>x.u===luser.value && x.p===lpass.value);
+if(u){currentUser=u.u;saveAll();showAccount();}
+else alert("Błędne dane");
+}
+
+function logout(){currentUser=null;saveAll();showAccount();}
+
+function showPolicy(){
+toggleMenu();
+content.innerHTML=`
+<h2>Polityka prywatności i regulamin</h2>
+
+<p>Strona ma charakter demonstracyjny, testowy i edukacyjny.</p>
+
+<h3>1. Informacje ogólne</h3>
+<p>Korzystanie ze strony oznacza pełną akceptację wszystkich zapisów.</p>
+
+<h3>2. Dane użytkownika</h3>
+<p>Dane konta przechowywane są wyłącznie w przeglądarce.</p>
+
+<h3>3. Trwałość danych</h3>
+<p>Po opuszczeniu strony dane nie są usuwane.</p>
+
+<div class="small-print">
+<p>Nie przyjmujemy zwrotów. Produkty nie są oryginalne. Strona nie prowadzi realnej sprzedaży.</p>
+</div>
+
+<h3>4. Produkty</h3>
+<p>Zdjęcia mają charakter poglądowy.</p>
+
+<h3>5. Odpowiedzialność</h3>
+<p>Sklep nie odpowiada za błędy techniczne.</p>
+
+<h3>6. Zmiany</h3>
+<p>Treść polityki może ulec zmianie w dowolnym momencie.</p>
+
+<div class="small-print">
+<p>Korzystanie z serwisu oznacza zrozumienie jego demonstracyjnego charakteru.</p>
+</div>
+`;
+}
+
+goHome();
+</script>
+
+</body>
+</html>
